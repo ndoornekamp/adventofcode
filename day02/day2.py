@@ -1,4 +1,4 @@
-input_file_path = "day2/input.txt"
+input_file_path = "day02/input.txt"
 
 with open(input_file_path, 'r') as infile:
     input = infile.readlines()

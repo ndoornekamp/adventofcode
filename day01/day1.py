@@ -1,6 +1,6 @@
 import heapq
 
-input_file_path = "day1/input.txt"
+input_file_path = "day01/input.txt"
 
 with open(input_file_path, 'r') as infile:
     input = infile.readlines()
