@@ -4,4 +4,5 @@ folder_name=day${1:?"Missing argument: please specify the day number (e.g. 01, 0
 mkdir $folder_name -p
 touch $folder_name/input.txt
 touch $folder_name/test_input.txt
-touch $folder_name/$folder_name.py
+touch $folder_name/part1.py
+touch $folder_name/part2.py
