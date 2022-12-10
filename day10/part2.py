@@ -11,7 +11,6 @@ signal_strengths = []
 crt_row = []
 crt_rows = []
 
-# print(f"During cycle {cycle}, X={X}")
 while True:
     if instruction_no >= len(instructions):
         break
@@ -19,7 +18,7 @@ while True:
     sprite_position_overlaps_with_pixel_index = abs((cycle % 40) - X) <= 1
     current_pixel = "#" if sprite_position_overlaps_with_pixel_index else "."
     crt_row.append(current_pixel)
-    print(crt_row)
+    print("".join(crt_row))
 
     if cycle == finished_at_end_of_cycle + 1:  # Previous instruction finished at the end of the previous cycle
         instruction = instructions[instruction_no].strip("\n")
@@ -35,14 +34,9 @@ while True:
         instruction_no += 1
         X = X + int(amount)
 
-    # print(f"After cycle {cycle}, X={X}")
     cycle += 1
-    # print()
-    # print(f"During cycle {cycle}, X={X}")
 
     if cycle % 40 == 0:
-        print(f"During cycle {cycle}, X={X}")
-        signal_strengths.append((cycle+1)*X)
         crt_rows.append(crt_row)
         crt_row = []
 
