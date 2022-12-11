@@ -37,10 +37,9 @@ for round in tqdm(range(10_000)):
 
             monkey["nof_inspections"] += 1
 
-            # Relief: divide by three; round down
-            # new = math.floor(new/3)
-            # print(f"Worry level is divided to {new}")
-
+            # We can safely take away any multiples of the product of the test numbers without affecting divisibility
+            # E.g. when you're testing whether a given number is divisible by 2 or 3, you may subtract 6 as many
+            # times as you like, without affecting the outcome of any of your tests
             new = new % factor
 
             # Test: throw to different monkey
