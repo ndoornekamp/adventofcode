@@ -1,6 +1,6 @@
 from tqdm import tqdm
 
-input_file_path = "day18/test_input.txt"
+input_file_path = "day18/input.txt"
 
 with open(input_file_path, 'r') as infile:
     input = infile.read()
@@ -10,30 +10,27 @@ for coordinate in input.split("\n"):
     x, y, z = coordinate.split(",")
     coordinates.append((int(x), int(y), int(z)))
 
+# A side is exposed if:
+#   1. It is not adjacent to rock, and
+#   2. It is not adjacent to an air pocket
 exposed_sides = 0
-for c1 in tqdm(coordinates):
-    if not any([(c1[0] + 1 == c2[0] and c1[1] == c2[1] and c1[2] == c2[2]) for c2 in coordinates]):
-        # c1 is not covered by any other cube in the positive x-direction
+for c in tqdm(coordinates):
+    if (c[0] + 1, c[1], c[2]) not in coordinates:
         exposed_sides += 1
 
-    if not any([(c1[0] - 1 == c2[0] and c1[1] == c2[1] and c1[2] == c2[2]) for c2 in coordinates]):
-        # c1 is not covered by any other cube in the negative x-direction
+    if (c[0] - 1, c[1], c[2]) not in coordinates:
         exposed_sides += 1
 
-    if not any([(c1[0] == c2[0] and c1[1] + 1 == c2[1] and c1[2] == c2[2]) for c2 in coordinates]):
-        # c1 is not covered by any other cube in the positive y-direction
+    if (c[0], c[1] + 1, c[2]) not in coordinates:
         exposed_sides += 1
 
-    if not any([(c1[0] == c2[0] and c1[1] - 1 == c2[1] and c1[2] == c2[2]) for c2 in coordinates]):
-        # c1 is not covered by any other cube in the negative y-direction
+    if (c[0], c[1] - 1, c[2]) not in coordinates:
         exposed_sides += 1
 
-    if not any([(c1[0] == c2[0] and c1[1] == c2[1] and c1[2] + 1 == c2[2]) for c2 in coordinates]):
-        # c1 is not covered by any other cube in the positive z-direction
+    if (c[0], c[1], c[2] + 1) not in coordinates:
         exposed_sides += 1
 
-    if not any([(c1[0] == c2[0] and c1[1] == c2[1] and c1[2] - 1 == c2[2]) for c2 in coordinates]):
-        # c1 is not covered by any other cube in the negative z-direction
+    if (c[0], c[1], c[2] - 1) not in coordinates:
         exposed_sides += 1
 
 print(exposed_sides)
