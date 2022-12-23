@@ -2,7 +2,7 @@ import re
 
 import numpy as np
 
-input_file_path = "day22/input.txt"
+input_file_path = "day22/test_input.txt"
 
 directions = [
     np.array((0, 1)),
@@ -30,7 +30,9 @@ for i, row in enumerate(board.split("\n")):
         else:
             raise
 
-def move(number_of_steps, location, direction):
+
+def move(number_of_steps, location, direction_idx):
+    direction = directions[direction_idx]
     for _ in range(number_of_steps):
         next_location = tuple(location + direction)
         if (next_location not in wall_tiles) and (next_location not in open_tiles):
@@ -66,7 +68,7 @@ for instruction in matches:
     print(instruction)
     number_of_steps = int(instruction[:-1])
 
-    location = move(number_of_steps, location, direction)
+    location = move(number_of_steps, location, direction_idx)
 
     print(f"Direction was {direction}")
     turning_direction = instruction[-1]
@@ -84,7 +86,7 @@ for instruction in matches:
 
 if input[-1] in [str(i) for i in range(10)]:
     number_of_steps = int(input[-1])
-    location = move(number_of_steps, location, direction)
+    location = move(number_of_steps, location, direction_idx)
 
 # 131016 is too low
 print(f"Final row: {location[0] + 1}, final column {location[1] + 1}, final facing {direction_idx}")
