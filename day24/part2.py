@@ -98,7 +98,7 @@ def solve(blizzards, walls, location, target, steps, row_bounds, col_bounds):
 
         states = new_states
 
-    return steps
+    return steps, blizzards
 
 
 if __name__ == '__main__':
@@ -109,6 +109,7 @@ if __name__ == '__main__':
 
     blizzards, walls, start, target, row_bounds, col_bounds = parse_input(input)
 
-    # 250 is too low
-    # 300 is too high
-    print(solve(blizzards=blizzards, walls=walls, location=start, target=target, steps=0, row_bounds=row_bounds, col_bounds=col_bounds))
+    steps, blizzards = solve(blizzards=blizzards, walls=walls, location=start, target=target, steps=0, row_bounds=row_bounds, col_bounds=col_bounds)
+    steps, blizzards = solve(blizzards=blizzards, walls=walls, location=target, target=start, steps=steps, row_bounds=row_bounds, col_bounds=col_bounds)
+    steps, blizzards = solve(blizzards=blizzards, walls=walls, location=start, target=target, steps=steps, row_bounds=row_bounds, col_bounds=col_bounds)
+    print(steps)
