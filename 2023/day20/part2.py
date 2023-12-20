@@ -125,7 +125,3 @@ while True:
             send_pulse(destination, signal, source)
     except StopIteration:
         break
-
-print(n_button_presses)
-
-# 814_934_624 is too low
