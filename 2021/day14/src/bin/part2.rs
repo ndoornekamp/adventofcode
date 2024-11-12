@@ -38,13 +38,13 @@ fn solve(input: &str, nof_steps: usize) -> u64 {
     for _step in 1..=nof_steps {
         let mut new_pairs: HashMap<String, u64> = HashMap::new();
         for p in pairs {
-            let first_new_pair = format!("{}{}", p.0[0..=0].to_string(), &rules[&p.0]);
+            let first_new_pair = format!("{}{}", &p.0[0..=0], &rules[&p.0]);
             new_pairs
                 .entry(first_new_pair)
                 .and_modify(|count| *count += p.1)
                 .or_insert(p.1);
 
-            let second_new_pair = format!("{}{}", &rules[&p.0], p.0[1..=1].to_string());
+            let second_new_pair = format!("{}{}", &rules[&p.0], &p.0[1..=1]);
             new_pairs
                 .entry(second_new_pair)
                 .and_modify(|count| *count += p.1)
