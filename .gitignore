@@ -3,3 +3,6 @@
 
 # Rust cache
 **/**/target
+
+# Python cache
+**/__pycache__

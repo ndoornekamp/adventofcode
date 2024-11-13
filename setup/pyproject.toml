@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "setup"
+version = "0.1.0"
+description = "Setup for AoC"
+authors = ["Nick Doornekamp <nddoornekamp@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+aocd = "^0.1"
+typer = "^0.13.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
