@@ -55,7 +55,7 @@ def setup_rust(day: int, year: int, puzzle: Puzzle):
 
     answer_example_part_1 = puzzle.examples[0].answer_a or "None"
 
-    example_input = "\t\t\t" + "\n\t\t\t".join(puzzle.examples[0].input_data.split("\n"))
+    example_input = "            " + "\n            ".join(puzzle.examples[0].input_data.split("\n"))
     template = Template(default_rs_file_content).substitute(
         output=answer_example_part_1,
         input=example_input,
