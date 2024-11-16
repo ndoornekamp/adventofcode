@@ -48,7 +48,7 @@ impl Grid<u32> {
     pub fn manhattan_neighbors(&self, coordinate: (usize, usize)) -> Vec<(usize, usize)> {
         let mut neighbors: Vec<(usize, usize)> = Vec::new();
 
-        let ds: Vec<(isize, isize)> = [(1, 0), (-1, 0), (0, 1), (0, 1)].to_vec();
+        let ds: Vec<(isize, isize)> = [(1, 0), (0, 1), (-1, 0), (0, -1)].to_vec();
 
         for d in ds {
             if (coordinate.0 as isize + d.0) >= 0

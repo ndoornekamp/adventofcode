@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::{cmp::Reverse, collections::BinaryHeap};
 
 mod grid;
 
@@ -10,50 +10,66 @@ fn main() {
 }
 
 fn solve(input: &str) -> usize {
-    // TODO: create 5x5 grid with increasing risk levels
-    let grid = grid::Grid::from_txt(input);
+    let one_by_one_grid = grid::Grid::from_txt(input);
 
-    let mut nodes: HashSet<(usize, usize)> = HashSet::new();
-    for r in 0..grid.nof_rows() {
-        for c in 0..grid.nof_cols() {
-            nodes.insert((r, c));
+    // 1x1 --> 1x5
+    let mut new_rows: Vec<Vec<u32>> = Vec::new();
+    for row in &one_by_one_grid.rows {
+        let mut new_row = row.clone();
+        for i in 1..=4 {
+            for v in row.iter() {
+                if v + i > 9 {
+                    new_row.push(v + i - 9);
+                } else {
+                    new_row.push(v + i);
+                }
+            }
+        }
+        new_rows.push(new_row.clone());
+    }
+
+    // 1x5 --> 5x5
+    let mut new_new_rows: Vec<Vec<u32>> = new_rows.clone();
+    for i in 1..=4 {
+        for row in new_rows.iter() {
+            let mut new_new_row: Vec<u32> = Vec::new();
+            for v in row.iter() {
+                if v + i > 9 {
+                    new_new_row.push(v + i - 9);
+                } else {
+                    new_new_row.push(v + i);
+                }
+            }
+            new_new_rows.push(new_new_row);
         }
     }
 
-    let mut unvisited_nodes = nodes.clone();
-    let mut distances: HashMap<(usize, usize), usize> = unvisited_nodes
-        .iter()
-        .map(|n| ((n.0, n.1), usize::MAX))
-        .collect();
+    let grid = grid::Grid { rows: new_new_rows };
 
-    let mut current_node: (usize, usize) = (0, 0);
-    distances.insert(current_node, 0);
+    // Dijkstra starting at top left (0, 0) ending at bottom right
+    let mut visited = vec![vec![false; grid.nof_cols()]; grid.nof_rows()];
+    let mut distances = vec![vec![usize::MAX; grid.nof_cols()]; grid.nof_rows()];
+    let mut heap = BinaryHeap::new();
 
-    loop {
-        unvisited_nodes.remove(&current_node);
+    distances[0][0] = 0;
+    heap.push((Reverse(0), (0, 0)));
 
-        if unvisited_nodes.is_empty() {
-            break;
+    while let Some((Reverse(distance_to_current_node), current_node)) = heap.pop() {
+        if visited[current_node.0][current_node.1] {
+            continue;
         }
+        visited[current_node.0][current_node.1] = true;
 
-        for neighbor in grid.manhattan_neighbors(current_node) {
-            let d =
-                distances.get(&current_node).unwrap() + grid.rows[neighbor.0][neighbor.1] as usize;
+        for neighbor in grid.manhattan_neighbors((current_node.0, current_node.1)) {
+            let d = distance_to_current_node + grid.rows[neighbor.0][neighbor.1] as usize;
 
-            if d < *distances.get(&neighbor).unwrap() {
-                distances.insert(neighbor, d);
-            }
-        }
-
-        let mut next_node_distance = usize::MAX;
-        for node in &unvisited_nodes {
-            if distances.get(node).unwrap() < &next_node_distance {
-                current_node = *node;
-                next_node_distance = *distances.get(node).unwrap();
+            if d < distances[neighbor.0][neighbor.1] {
+                distances[neighbor.0][neighbor.1] = d;
+                heap.push((Reverse(d), neighbor));
             }
         }
     }
-    *distances.get(&(grid.nof_rows() - 1, grid.nof_cols() - 1)).unwrap()
+    distances[grid.nof_rows() - 1][grid.nof_cols() - 1]
 }
 
 #[cfg(test)]
@@ -64,56 +80,16 @@ mod tests {
     #[test]
     fn example_part_2() {
         let input = indoc! {"
-            11637517422274862853338597396444961841755517295286
-            13813736722492484783351359589446246169155735727126
-            21365113283247622439435873354154698446526571955763
-            36949315694715142671582625378269373648937148475914
-            74634171118574528222968563933317967414442817852555
-            13191281372421239248353234135946434524615754563572
-            13599124212461123532357223464346833457545794456865
-            31254216394236532741534764385264587549637569865174
-            12931385212314249632342535174345364628545647573965
-            23119445813422155692453326671356443778246755488935
-            22748628533385973964449618417555172952866628316397
-            24924847833513595894462461691557357271266846838237
-            32476224394358733541546984465265719557637682166874
-            47151426715826253782693736489371484759148259586125
-            85745282229685639333179674144428178525553928963666
-            24212392483532341359464345246157545635726865674683
-            24611235323572234643468334575457944568656815567976
-            42365327415347643852645875496375698651748671976285
-            23142496323425351743453646285456475739656758684176
-            34221556924533266713564437782467554889357866599146
-            33859739644496184175551729528666283163977739427418
-            35135958944624616915573572712668468382377957949348
-            43587335415469844652657195576376821668748793277985
-            58262537826937364893714847591482595861259361697236
-            96856393331796741444281785255539289636664139174777
-            35323413594643452461575456357268656746837976785794
-            35722346434683345754579445686568155679767926678187
-            53476438526458754963756986517486719762859782187396
-            34253517434536462854564757396567586841767869795287
-            45332667135644377824675548893578665991468977611257
-            44961841755517295286662831639777394274188841538529
-            46246169155735727126684683823779579493488168151459
-            54698446526571955763768216687487932779859814388196
-            69373648937148475914825958612593616972361472718347
-            17967414442817852555392896366641391747775241285888
-            46434524615754563572686567468379767857948187896815
-            46833457545794456865681556797679266781878137789298
-            64587549637569865174867197628597821873961893298417
-            45364628545647573965675868417678697952878971816398
-            56443778246755488935786659914689776112579188722368
-            55172952866628316397773942741888415385299952649631
-            57357271266846838237795794934881681514599279262561
-            65719557637682166874879327798598143881961925499217
-            71484759148259586125936169723614727183472583829458
-            28178525553928963666413917477752412858886352396999
-            57545635726865674683797678579481878968159298917926
-            57944568656815567976792667818781377892989248891319
-            75698651748671976285978218739618932984172914319528
-            56475739656758684176786979528789718163989182927419
-            67554889357866599146897761125791887223681299833479
+            1163751742
+            1381373672
+            2136511328
+            3694931569
+            7463417111
+            1319128137
+            1359912421
+            3125421639
+            1293138521
+            2311944581
         "};
         let result = solve(input);
         assert_eq!(result, 315);
