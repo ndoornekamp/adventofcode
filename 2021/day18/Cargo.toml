@@ -1,0 +1,11 @@
+[package]
+name = "day18"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+indoc = "2.0.5"
+regex = "1.11.1"
+
+[dev-dependencies]
+rstest = "0.23.0"
