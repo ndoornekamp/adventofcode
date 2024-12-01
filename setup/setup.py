@@ -29,7 +29,44 @@ def main(day: int | None = None, year: int | None = None, language: Languages = 
 
 
 def setup_python(day: int, year: int, puzzle: Puzzle):
-    raise NotImplementedError()
+    project_path = os.path.join(str(year), f"day{day:02d}")
+    os.makedirs(project_path, exist_ok=True)
+
+    subprocess.run(["poetry", "init", "-n"], check=True, cwd=project_path)
+    subprocess.run(["poetry", "add", "pytest"], check=True, cwd=project_path)
+
+    # Append line with pytest option to pyproject.toml so it checks for tests in any .py file instead of
+    # just test_*.py files
+    with open(os.path.join(project_path, "pyproject.toml"), "a") as f:
+        f.write('\n[tool.pytest.ini_options]\npython_files = "*.py"')
+
+    # Add settings.json with pytest option for running tests from VSCode
+    os.makedirs(os.path.join(project_path, ".vscode"), exist_ok=True)
+    with open(os.path.join(project_path, ".vscode", "settings.json"), "w") as f:
+        f.write('{"python.testing.pytestEnabled": true}')
+
+    # Puzzle input to input.txt
+    with open(os.path.join(project_path, "input.txt"), "w") as f:
+        f.write(puzzle.input_data)
+
+    # Populate the part1.py file with the default.py template, filling in the example input and output
+    with open(os.path.join("setup", "default.py"), "r") as f:
+        default_py_file_content = f.read()
+
+    template = Template(default_py_file_content)
+    if puzzle.examples:
+        answer_example_part_1 = puzzle.examples[0].answer_a or "None" if puzzle.examples else "None"
+
+        example_input = "        " + "\n        ".join(puzzle.examples[0].input_data.split("\n"))
+        template = template.substitute(output=answer_example_part_1, input=example_input)
+    else:
+        template = template.substitute(output="None", input="None")
+
+    with open(os.path.join(project_path, "part1.py"), "w") as f:
+        f.write(template)
+
+    # Create an empty part2.py file - most likely we'll end up copying part 1 into it and modifying it for part 2
+    open(os.path.join(project_path, "part2.py"), "w").close()
 
 
 def setup_rust(day: int, year: int, puzzle: Puzzle):
@@ -53,13 +90,14 @@ def setup_rust(day: int, year: int, puzzle: Puzzle):
     with open(os.path.join("setup", "default.rs"), "r") as f:
         default_rs_file_content = f.read()
 
-    answer_example_part_1 = puzzle.examples[0].answer_a or "None"
+    template = Template(default_rs_file_content)
+    if puzzle.examples:
+        answer_example_part_1 = puzzle.examples[0].answer_a or "None" if puzzle.examples else "None"
 
-    example_input = "            " + "\n            ".join(puzzle.examples[0].input_data.split("\n"))
-    template = Template(default_rs_file_content).substitute(
-        output=answer_example_part_1,
-        input=example_input,
-    )
+        example_input = "            " + "\n            ".join(puzzle.examples[0].input_data.split("\n"))
+        template = template.substitute(output=answer_example_part_1, input=example_input)
+    else:
+        template = template.substitute(output="None", input="None")
 
     with open(os.path.join(bin_dir, "part1.rs"), "w") as f:
         f.write(template)
