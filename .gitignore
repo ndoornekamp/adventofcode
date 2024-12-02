@@ -6,3 +6,6 @@
 
 # Python cache
 **/__pycache__
+
+# VSCode settings
+**/**/.vscode/settings.json
