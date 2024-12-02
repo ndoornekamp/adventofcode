@@ -1,11 +1,14 @@
-def solve(input_lines: str) -> int:
+from textwrap import dedent
+
+
+def solve(input: str) -> int:
     return $output
 
 
 def test_solve():
-    input = """
+    input = dedent("""
 $input
-    """
+    """)
     assert solve(input) == $output
 
 
