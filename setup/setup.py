@@ -1,4 +1,5 @@
 from enum import Enum
+import shutil
 from aocd.models import Puzzle
 from datetime import datetime
 import os
@@ -19,17 +20,23 @@ def main(day: int | None = None, year: int | None = None, language: Languages = 
         year = datetime.now().year
 
     puzzle = Puzzle(day=day, year=year)
-
-    if language == Languages.PYTHON:
-        setup_python(day, year, puzzle)
-    elif language == Languages.RUST:
-        setup_rust(day, year, puzzle)
-    else:
-        raise
-
-
-def setup_python(day: int, year: int, puzzle: Puzzle):
     project_path = os.path.join(str(year), f"day{day:02d}")
+    assert not os.path.isdir(project_path), f"Project directory {project_path} already exists"
+
+    try:
+        if language == Languages.PYTHON:
+            setup_python(project_path, puzzle)
+        elif language == Languages.RUST:
+            setup_rust(project_path, puzzle)
+        else:
+            raise NotImplementedError()
+    except Exception as e:
+        print(f"Failed to setup project: {e}")
+        shutil.rmtree(project_path)
+
+
+def setup_python(project_path: str, puzzle: Puzzle):
+
     os.makedirs(project_path, exist_ok=True)
 
     subprocess.run(["poetry", "init", "-n"], check=True, cwd=project_path)
@@ -69,9 +76,8 @@ def setup_python(day: int, year: int, puzzle: Puzzle):
     open(os.path.join(project_path, "part2.py"), "w").close()
 
 
-def setup_rust(day: int, year: int, puzzle: Puzzle):
+def setup_rust(project_path: str, puzzle: Puzzle):
     # Create the Rust project
-    project_path = os.path.join(str(year), f"day{day:02d}")
     subprocess.run(["cargo", "new", project_path, "--bin"], check=True)
     subprocess.run(["cargo", "add", "indoc"], check=True, cwd=project_path)
 
