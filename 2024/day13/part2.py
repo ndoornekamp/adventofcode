@@ -1,6 +1,7 @@
 import re
 from textwrap import dedent
-import numpy as np
+
+import z3
 
 
 def solve(input: str) -> int:
@@ -13,17 +14,18 @@ def solve(input: str) -> int:
         numbers[4] = numbers[4] + 10000000000000
         numbers[5] = numbers[5] + 10000000000000
 
-        A = np.array([[numbers[0], numbers[2]], [numbers[1], numbers[3]]])
-        b = np.array([numbers[4], numbers[5]])
+        a = z3.Int('a')
+        b = z3.Int('b')
+        s = z3.Solver()
 
-        solution = np.linalg.solve(A, b)
+        s.add(a > 0)
+        s.add(b > 0)
+        s.add(a * numbers[0] + b * numbers[2] == numbers[4])
+        s.add(a * numbers[1] + b * numbers[3] == numbers[5])
 
-        # A solution is guaranteed to exist without constraining the inputs to integer, but for this problem
-        # the solution is only relevant if it is integer
-        fp_errors = np.array([abs(solution[0] - round(solution[0])), abs(solution[1] - round(solution[1]))])
-        # Ans was too low for fp_error < 1e-5, so increased the wiggle room for floating point errors a bit here
-        if all(fp_error < 1e-4 for fp_error in fp_errors):
-            ans += 3 * round(solution[0]) + round(solution[1])
+        if s.check() == z3.sat:
+            model = s.model()
+            ans += model[a].as_long() * 3 + model[b].as_long()
 
     return int(ans)
 
