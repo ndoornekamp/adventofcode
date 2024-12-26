@@ -1,0 +1,13 @@
+[project]
+name = "day24"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.12"
+dependencies = [
+    "ipysigma>=0.24.4",
+    "networkx>=3.4.2",
+    "pytest>=8.3.4",
+]
+
+[tool.pytest.ini_options]
+python_files = "*.py"
