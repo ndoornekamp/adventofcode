@@ -1,7 +1,6 @@
 from functools import cache
 import itertools
 from textwrap import dedent
-from tqdm import tqdm
 
 import pytest
 
@@ -10,7 +9,7 @@ def solve(input: str, max_depth: int) -> int:
     ans = 0
     codes = input.strip().split("\n")
 
-    for code in tqdm(codes):
+    for code in codes:
         ans += int(code[:-1]) * shortest_sequence_len(code, max_depth=max_depth)
 
     return ans
@@ -19,40 +18,41 @@ def solve(input: str, max_depth: int) -> int:
 def shortest_sequence_len(code: str, max_depth: int) -> int:
     first_robot_pos = "A"
     moves_first_robot: list[list[str]] = []
-
     for numeric_key in code:
-        moves_first_robot += [list(possible_moves_on_numeric_pad(first_robot_pos, numeric_key))] + [["A"]]
+        moves_first_robot += [list(possible_moves_on_numeric_pad(first_robot_pos, numeric_key))]
         first_robot_pos = numeric_key
 
-    ans = 1000
-    for possible_step_sequence_first_robot in tqdm(list(itertools.product(*moves_first_robot))):
-        m = min_moves(possible_step_sequence_first_robot, depth=1, max_depth=max_depth)
-        if ans > m:
-            ans = m
+    ans = float("inf")
+    for possible_step_sequence_first_robot in list(itertools.product(*moves_first_robot)):
+        n_moves = 0
+        seq = list("A".join(possible_step_sequence_first_robot) + "A")
+        for src, dst in zip(["A"] + seq, seq):
+            n_moves += min_moves(src=src, dst=dst, depth=1, max_depth=max_depth)
 
+        ans = min(ans, n_moves)
+
+    assert isinstance(ans, int)
     return ans
 
 
 @cache
-def min_moves(step_sequence_prevous_robot: tuple[str, ...], depth: int, max_depth: int) -> int:
-    robot_pos = "A"
-    moves_this_robot: list[list[str]] = []
-    for step in step_sequence_prevous_robot:
-        for direction in step:
-            if robot_pos != direction:
-                moves_this_robot += [list(possible_moves_on_directional_pad(robot_pos, direction))]
-                moves_this_robot += [["A"]]
-                robot_pos = direction
-            else:
-                moves_this_robot += [["A"]]
-
+def min_moves(src: str, dst: str, depth: int, max_depth: int) -> int:
     if depth == max_depth:
-        return sum([len(m[0]) for m in moves_this_robot])
-    else:
-        n_moves_per_sequence = []
-        for step_sequence_this_robot in itertools.product(*moves_this_robot):
-            n_moves_per_sequence.append(min_moves(step_sequence_this_robot, depth=depth + 1, max_depth=max_depth))
-        return min(n_moves_per_sequence)
+        for item in possible_moves_on_directional_pad(src, dst):
+            return len(item) + 1
+
+    best_n_moves = float("inf")
+    for sequence in possible_moves_on_directional_pad(src, dst):
+        n_moves = 0
+        for a, b in zip(["A"] + list(sequence) + ["A"], list(sequence) + ["A"]):
+            # DFS instead of BFS because the enormous search space will never fit in memory
+            # Cache results per depth to make runtime manageable
+            n_moves += min_moves(a, b, depth + 1, max_depth)
+
+        best_n_moves = min(n_moves, best_n_moves)
+
+    assert isinstance(best_n_moves, int)
+    return best_n_moves
 
 
 def find_possible_moves(grid: list[list[str]], start: str, end: str, invalid_pos: tuple[int, int]) -> set[str]:
@@ -88,7 +88,6 @@ def find_possible_moves(grid: list[list[str]], start: str, end: str, invalid_pos
     return allowed_movesets
 
 
-@cache
 def possible_moves_on_numeric_pad(start: str, end: str) -> set[str]:
     grid = [
         ["7", "8", "9"],
@@ -106,32 +105,6 @@ def possible_moves_on_directional_pad(start: str, end: str) -> set[str]:
         ["<", "v", ">"],
     ]
     return find_possible_moves(grid, start, end, invalid_pos=(0, 0))
-
-
-@pytest.mark.parametrize(
-    ("start", "end", "expecteded_moves"),
-    [
-        ("A", "0", {"<"}),
-        ("0", "A", {">"}),
-        ("A", "1", {"^<<", "<^<"}),  # Avoid empty corner: <<^ is not valid
-        ("7", "0", {">vvv", "v>vv", "vv>v"}),  # Avoid empty corner: vvv> is not valid
-    ],
-)
-def test_moves_on_numeric_pad(start: str, end: str, expecteded_moves: str):
-    assert possible_moves_on_numeric_pad(start, end) == expecteded_moves
-
-
-@pytest.mark.parametrize(
-    ("start", "end", "expecteded_moves"),
-    [
-        ("A", "^", {"<"}),
-        ("^", "A", {">"}),
-        ("<", "A", {">>^", ">^>"}),  # Avoid empty corner: ^>> is not valid
-        ("A", "<", {"v<<", "<v<"}),  # Avoid empty corner: <<v is not valid
-    ],
-)
-def test_moves_on_directional_pad(start: str, end: str, expecteded_moves: str):
-    assert possible_moves_on_directional_pad(start, end) == expecteded_moves
 
 
 @pytest.mark.parametrize(
@@ -163,5 +136,5 @@ if __name__ == "__main__":
     with open("input.txt") as f:
         input = f.read()
 
-    ans = solve(input, max_depth=3)
+    ans = solve(input, max_depth=25)
     print(ans)

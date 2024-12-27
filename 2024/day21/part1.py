@@ -1,57 +1,58 @@
+from functools import cache
 import itertools
 from textwrap import dedent
+import time
 
 import pytest
 
 
-def solve(input: str) -> int:
+def solve(input: str, max_depth: int) -> int:
     ans = 0
     codes = input.strip().split("\n")
 
     for code in codes:
-        ans += int(code[:-1]) * shortest_sequence_len(code)
+        ans += int(code[:-1]) * shortest_sequence_len(code, max_depth=max_depth)
 
     return ans
 
 
-def shortest_sequence_len(code: str) -> int:
+def shortest_sequence_len(code: str, max_depth: int) -> int:
     first_robot_pos = "A"
     moves_first_robot: list[list[str]] = []
-
-    ans = 1000
 
     for numeric_key in code:
         moves_first_robot += [list(possible_moves_on_numeric_pad(first_robot_pos, numeric_key))] + [["A"]]
         first_robot_pos = numeric_key
 
-    for possible_step_sequence_first_robot in itertools.product(*moves_first_robot):
-        second_robot_pos = "A"
-        moves_second_robot: list[list[str]] = []
-        for step_first_robot in possible_step_sequence_first_robot:
-            for direction_second_robot in step_first_robot:
-                if second_robot_pos != direction_second_robot:
-                    moves_second_robot += [
-                        list(possible_moves_on_directional_pad(second_robot_pos, direction_second_robot))
-                    ]
-                moves_second_robot += [["A"]]
-                second_robot_pos = direction_second_robot
+    ans = float("inf")
+    for possible_step_sequence_first_robot in list(itertools.product(*moves_first_robot)):
+        m = min_moves(possible_step_sequence_first_robot, depth=1, max_depth=max_depth)
+        if ans > m:
+            ans = m
 
-        for possible_step_sequence_second_robot in itertools.product(*moves_second_robot):
-            third_robot_pos = "A"
-            moves_third_robot: list[list[str]] = []
-            for step_second_robot in possible_step_sequence_second_robot:
-                for direction_third_robot in step_second_robot:
-                    if third_robot_pos != direction_third_robot:
-                        moves_third_robot += [
-                            list(possible_moves_on_directional_pad(third_robot_pos, direction_third_robot))
-                        ]
-                    moves_third_robot += [["A"]]
-                    third_robot_pos = direction_third_robot
-
-            if ans > sum([len(m[0]) for m in moves_third_robot]):
-                ans = sum([len(m[0]) for m in moves_third_robot])
-
+    assert isinstance(ans, int)
     return ans
+
+
+def min_moves(step_sequence_prevous_robot: tuple[str, ...], depth: int, max_depth: int) -> int:
+    robot_pos = "A"
+    moves_this_robot: list[list[str]] = []
+    for step in step_sequence_prevous_robot:
+        for direction in step:
+            if robot_pos != direction:
+                moves_this_robot += [list(possible_moves_on_directional_pad(robot_pos, direction))]
+                moves_this_robot += [["A"]]
+                robot_pos = direction
+            else:
+                moves_this_robot += [["A"]]
+
+    if depth == max_depth:
+        return sum([len(m[0]) for m in moves_this_robot])
+    else:
+        n_moves_per_sequence = []
+        for step_sequence_this_robot in itertools.product(*moves_this_robot):
+            n_moves_per_sequence.append(min_moves(step_sequence_this_robot, depth=depth + 1, max_depth=max_depth))
+        return min(n_moves_per_sequence)
 
 
 def find_possible_moves(grid: list[list[str]], start: str, end: str, invalid_pos: tuple[int, int]) -> set[str]:
@@ -97,6 +98,7 @@ def possible_moves_on_numeric_pad(start: str, end: str) -> set[str]:
     return find_possible_moves(grid, start, end, invalid_pos=(3, 0))
 
 
+@cache
 def possible_moves_on_directional_pad(start: str, end: str) -> set[str]:
     grid = [
         ["", "^", "A"],
@@ -142,7 +144,7 @@ def test_moves_on_directional_pad(start: str, end: str, expecteded_moves: str):
     ],
 )
 def test_shortest_sequence(code: str, expected: str):
-    assert shortest_sequence_len(code) == expected
+    assert shortest_sequence_len(code, max_depth=2) == expected
 
 
 def test_solve():
@@ -153,12 +155,13 @@ def test_solve():
         456A
         379A
     """)
-    assert solve(input) == 126384
+    assert solve(input, max_depth=2) == 126384
 
 
 if __name__ == "__main__":
     with open("input.txt") as f:
         input = f.read()
 
-    ans = solve(input)
-    print(ans)
+    start = time.time()
+    ans = solve(input, max_depth=2)
+    print(ans, time.time() - start)
