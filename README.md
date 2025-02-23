@@ -5,7 +5,7 @@
 Set up a project for a new day by using the setup script:
 
 ```bash
-typer setup/setup.py run --day <day> --year <year> --language <language>
+uv run typer setup/setup.py run --day <day> --year <year> --language <language>
 ```
 
 Puzzle input and example input/output will be downloaded and inserted into the project using [aocd](https://github.com/wimglenn/advent-of-code-data).
