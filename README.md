@@ -2,6 +2,15 @@
 
 ## Setup
 
+Store your AoC session cookie:
+
+```bash
+mkdir ~/.config/aocd
+nano ~/.config/aocd/token
+```
+
+You can find your session cookie in your browser's developer tools under the "Cookies" section for the Advent of Code website.
+
 Set up a project for a new day by using the setup script:
 
 ```bash
