@@ -36,14 +36,17 @@ def main(day: int | None = None, year: int | None = None, language: Languages = 
 
 
 def setup_python(project_path: str, puzzle: Puzzle):
-
     os.makedirs(project_path, exist_ok=True)
 
     subprocess.run(["uv", "init", "-n", "--no-readme"], check=True, cwd=project_path)
-    subprocess.run(["uv", "add", "pytest"], check=True, cwd=project_path)
+    subprocess.run(["uv", "venv"], check=True, cwd=project_path)
 
-    # Remove the default hello.py file,
-    hello_file = os.path.join(project_path, "hello.py")
+    # Install pytest into the project's venv by specifying the python executable
+    venv_python = os.path.abspath(os.path.join(project_path, ".venv", "bin", "python"))
+    subprocess.run(["uv", "pip", "install", "--python", venv_python, "pytest"], check=True)
+
+    # Remove the default main.py file,
+    hello_file = os.path.join(project_path, "main.py")
     os.remove(hello_file)
 
     # Append line with pytest option to pyproject.toml so it checks for tests in any .py file instead of
