@@ -7,28 +7,16 @@ def solve(input: str) -> int:
 
     instructions = [l for l in input.split("\n") if l]
     for instruction in instructions:
-        moved_past = 0
-        if instruction[0] == "L":
-            position = position - (int(instruction[1:]))
+        clicks = int(instruction[1:])
 
-            while position < 0:
-                position += 100
-                moved_past += 1
-        else:
-            position = position + (int(instruction[1:]))
+        for _ in range(clicks):
+            if instruction[0] == "R":
+                position = (position + 1) % 100
+            else:
+                position = (position - 1) % 100
 
-            while position >= 100:
-                position -= 100
-                moved_past += 1
-
-        print(f"The dial is rotated {instruction} to point at {position}")
-
-        if position == 0:
-            ans += moved_past
-        else:
-            ans += moved_past
-            if moved_past:
-                print(f"The dial moved past 0 {moved_past} times")
+            if position == 0:
+                ans += 1
 
     return ans
 
