@@ -1,0 +1,11 @@
+[project]
+name = "day08"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.12, <4.0"
+dependencies = [
+    "networkx>=3.6",
+]
+
+[tool.pytest.ini_options]
+python_files = "*.py"
